@@ -57,12 +57,13 @@ const useStyles = makeStyles((theme) => ({
 
 const SessionSchema = Yup.object().shape({
   name: Yup.string()
-    .min(2, "Too Short!")
-    .max(50, "Too Long!")
-    .required("Required"),
+    .min(2, i18n.t("whatsappModal.formErrors.name.short"))
+    .max(50, i18n.t("whatsappModal.formErrors.name.long"))
+    .required(i18n.t("whatsappModal.formErrors.name.required")),
 });
 
 const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
+
   const classes = useStyles();
   const initialState = {
     name: "",
@@ -78,38 +79,50 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     expiresInactiveMessage: "",
     expiresTicket: 0,
     timeUseBotQueues: 0,
-    maxUseBotQueues: 3
+    maxUseBotQueues: 3,
+    integration: null
   };
+
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
   const [queues, setQueues] = useState([]);
   const [selectedQueueId, setSelectedQueueId] = useState(null)
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [prompts, setPrompts] = useState([]);
+  const [integrations, setIntegrations] = useState([]);
+  const [selectedIntegration, setSelectedIntegration] = useState(null);
   
     useEffect(() => {
-    const fetchSession = async () => {
-      if (!whatsAppId) return;
+      const fetchSession = async () => {
+        if (!whatsAppId) return;
 
-      try {
-        const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
-        setWhatsApp(data);
+        try {
+          
+          const { data } = await api.get(`whatsapp/${whatsAppId}?session=0`);
 
-        const whatsQueueIds = data.queues?.map((queue) => queue.id);
-        setSelectedQueueIds(whatsQueueIds);
-		setSelectedQueueId(data.transferQueueId);
-      } catch (err) {
-        toastError(err);
-      }
-    };
-    fetchSession();
-  }, [whatsAppId]);
+          setWhatsApp(data);
+          setSelectedPrompt( data.promptId );
+          setSelectedIntegration(data.integrationId)
+
+          const whatsQueueIds = data.queues?.map((queue) => queue.id);
+          setSelectedQueueIds(whatsQueueIds);
+          setSelectedQueueId(data.transferQueueId);
+        } catch (err) {
+          toastError(err);
+        }
+      };
+      fetchSession();
+    }, [whatsAppId]);
 
   useEffect(() => {
     (async () => {
       try {
         const { data } = await api.get("/prompt");
         setPrompts(data.prompts);
+
+        const {data: dataIntegration} = await api.get("/queueIntegration");
+        setIntegrations(dataIntegration.queueIntegrations);
+
       } catch (err) {
         toastError(err);
       }
@@ -128,9 +141,10 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   }, []);
 
   const handleSaveWhatsApp = async (values) => {
-const whatsappData = {
+    const whatsappData = {
       ...values, queueIds: selectedQueueIds, transferQueueId: selectedQueueId,
-      promptId: selectedPrompt ? selectedPrompt : null
+      promptId: selectedPrompt ? selectedPrompt : null,
+      integrationId: selectedIntegration
     };
     delete whatsappData["queues"];
     delete whatsappData["session"];
@@ -157,6 +171,10 @@ const whatsappData = {
     setSelectedPrompt(e.target.value);
     setSelectedQueueIds([]);
   };
+
+  const handleChangeIntegration = (e) => {
+    setSelectedIntegration(e.target.value);
+  }
 
   const handleClose = () => {
     onClose();
@@ -352,6 +370,44 @@ const whatsappData = {
                     ))}
                   </Select>
                 </FormControl>
+                <FormControl
+                  margin="dense"
+                  variant="outlined"
+                  fullWidth
+                >
+                  <InputLabel>
+                    {i18n.t("whatsappModal.form.integration")}
+                  </InputLabel>
+                  <Select
+                    labelId="dialog-select-integration-label"
+                    id="dialog-select-integration"
+                    name="promptId"
+                    value={selectedIntegration || ""}
+                    onChange={handleChangeIntegration}
+                    label={i18n.t("whatsappModal.form.integration")}
+                    fullWidth
+                    MenuProps={{
+                      anchorOrigin: {
+                        vertical: "bottom",
+                        horizontal: "left",
+                      },
+                      transformOrigin: {
+                        vertical: "top",
+                        horizontal: "left",
+                      },
+                      getContentAnchorEl: null,
+                    }}
+                  >
+                    {integrations.map((prompt) => (
+                      <MenuItem
+                        key={prompt.id}
+                        value={prompt.id}
+                      >
+                        {prompt.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <div>
                   <h3>{i18n.t("whatsappModal.form.queueRedirection")}</h3>
                   <p>{i18n.t("whatsappModal.form.queueRedirectionDesc")}</p>
@@ -361,7 +417,7 @@ const whatsappData = {
                       fullWidth
                       type="number"
                       as={TextField}
-                      label='Transferir após x (minutos)'
+                      label={i18n.t("whatsappModal.form.timeToTransfer")}
                       name="timeToTransfer"
                       error={touched.timeToTransfer && Boolean(errors.timeToTransfer)}
                       helperText={touched.timeToTransfer && errors.timeToTransfer}
@@ -380,7 +436,7 @@ const whatsappData = {
                         setSelectedQueueId(selectedId)
                       }}
                       multiple={false}
-                      title={'Fila de Transferência'}
+                      title={i18n.t("whatsappModal.form.queue")}
                     />
                   </Grid>
 

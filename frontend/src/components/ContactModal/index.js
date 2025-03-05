@@ -22,6 +22,8 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
+import InputMask from 'react-input-mask';
+
 const useStyles = makeStyles(theme => ({
 	root: {
 		display: "flex",
@@ -52,13 +54,23 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
+const MaskedTextField = ({ field, form, ...props }) => {
+	return (
+	  <InputMask {...field} {...props}>
+		{(inputProps) => <TextField {...inputProps} />}
+	  </InputMask>
+	);
+};
+
 const ContactSchema = Yup.object().shape({
 	name: Yup.string()
-		.min(2, "Too Short!")
-		.max(50, "Too Long!")
-		.required("Required"),
-	number: Yup.string().min(8, "Too Short!").max(50, "Too Long!"),
-	email: Yup.string().email("Invalid email"),
+		.min(2, i18n.t("contactModal.formErrors.name.short"))
+		.max(50, i18n.t("contactModal.formErrors.name.long"))
+		.required(i18n.t("contactModal.formErrors.name.required")),
+	number: Yup.string().min(8, 
+		i18n.t("contactModal.formErrors.phone.short")).max(50, 
+		i18n.t("contactModal.formErrors.phone.long")),
+	email: Yup.string().email(i18n.t("contactModal.formErrors.email.invalid")),
 });
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
@@ -93,7 +105,10 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 				const { data } = await api.get(`/contacts/${contactId}`);
 				if (isMounted.current) {
 					console.log(data)
-					setContact(data);
+					setContact({
+						...data,
+						number: data.number,
+					});
 				}
 			} catch (err) {
 				toastError(err);
@@ -121,8 +136,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 				handleClose();
 			}
 			toast.success(i18n.t("contactModal.success"));
-		} catch (err) {
-			toastError(err);
+		} catch (e) {	
+			toastError(e);
 		}
 	};
 
@@ -164,14 +179,15 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 								/>
 								<Field
 									as={TextField}
-									label={i18n.t("contactModal.form.number")}
 									name="number"
+									label={i18n.t("contactModal.form.number")}
 									error={touched.number && Boolean(errors.number)}
 									helperText={touched.number && errors.number}
-									placeholder="5541998608485"
+									placeholder=""
 									variant="outlined"
 									margin="dense"
 								/>
+
 								<div>
 									<Field
 										as={TextField}

@@ -98,7 +98,7 @@ const SocketManager = {
       }
 
       let token = JSON.parse(localStorage.getItem("token"));
-      const { exp } = jwt.decode(token);
+      const { exp } = jwt.decode(token) ?? {};
 
       if ( Date.now() >= exp*1000) {
         console.warn("Expired token, reload after refresh");

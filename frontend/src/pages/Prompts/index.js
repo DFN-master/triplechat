@@ -56,6 +56,9 @@ const reducer = (state, action) => {
     const prompts = action.payload;
     const newPrompts = [];
 
+    if( prompts.length === 0 )
+      return [];
+
     prompts.forEach((prompt) => {
       const promptIndex = state.findIndex((p) => p.id === prompt.id);
       if (promptIndex !== -1) {
@@ -128,8 +131,7 @@ const Prompts = () => {
     (async () => {
       setLoading(true);
       try {
-        const { data } = await api.get("/prompt");
-        dispatch({ type: "LOAD_PROMPTS", payload: data.prompts });
+        getPrompts(  );
 
         setLoading(false);
       } catch (err) {
@@ -157,6 +159,12 @@ const Prompts = () => {
     };
   }, [companyId, socketManager]);
 
+  const getPrompts = async (  ) => {
+
+    const { data } = await api.get("/prompt");
+    dispatch({ type: "LOAD_PROMPTS", payload: data.prompts });
+  }
+
   const handleOpenPromptModal = () => {
     setPromptModalOpen(true);
     setSelectedPrompt(null);
@@ -179,8 +187,11 @@ const Prompts = () => {
 
   const handleDeletePrompt = async (promptId) => {
     try {
+
       const { data } = await api.delete(`/prompt/${promptId}`);
+      dispatch({type: "DELETE_PROMPT", payload: promptId});
       toast.info(i18n.t(data.message));
+  
     } catch (err) {
       toastError(err);
     }
@@ -189,8 +200,6 @@ const Prompts = () => {
 
   return (
     <MainContainer>
-   
-
       <ConfirmationModal
         title={
           selectedPrompt &&
@@ -207,6 +216,7 @@ const Prompts = () => {
         open={promptModalOpen}
         onClose={handleClosePromptModal}
         promptId={selectedPrompt?.id}
+        refreshPrompts={getPrompts}
       />
       <MainHeader>
         <Title>{i18n.t("prompts.title")}</Title>
@@ -243,7 +253,7 @@ const Prompts = () => {
               {prompts.map((prompt) => (
                 <TableRow key={prompt.id}>
                   <TableCell align="left">{prompt.name}</TableCell>
-                  <TableCell align="left">{prompt.queue.name}</TableCell>
+                  <TableCell align="left">{prompt.queue?.name}</TableCell>
                   <TableCell align="left">{prompt.maxTokens}</TableCell>
                   <TableCell align="center">
                     <IconButton

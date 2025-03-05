@@ -1,3 +1,4 @@
+import { createContactListFromTag, createContactListFromTagAndContactList } from "../../controllers/CampaignController";
 import AppError from "../../errors/AppError";
 import Campaign from "../../models/Campaign";
 import ContactList from "../../models/ContactList";
@@ -7,24 +8,19 @@ interface Data {
   id: number | string;
   name: string;
   status: string;
-  confirmation: boolean;
   scheduledAt: string;
   companyId: number;
+  tagId: number | null;
   contactListId: number;
   message1?: string;
   message2?: string;
   message3?: string;
   message4?: string;
   message5?: string;
-  confirmationMessage1?: string;
-  confirmationMessage2?: string;
-  confirmationMessage3?: string;
-  confirmationMessage4?: string;
-  confirmationMessage5?: string;
   fileListId: number;
 }
 
-const UpdateService = async (data: Data): Promise<Campaign> => {
+const UpdateService = async (data: Data, companyId: number): Promise<Campaign> => {
   const { id } = data;
 
   const record = await Campaign.findByPk(id);
@@ -46,6 +42,36 @@ const UpdateService = async (data: Data): Promise<Campaign> => {
     data.status === "INATIVA"
   ) {
     data.status = "PROGRAMADA";
+  }
+
+  if(record.tagId !== data.tagId) {
+    if (data.tagId && typeof data.contactListId !== 'number') {
+      const tagId = data.tagId;
+      const campanhaNome = data.name;
+
+      try {
+        const contactListId = await createContactListFromTag(tagId, companyId, campanhaNome);
+
+        data.contactListId = contactListId;
+        data.tagId = Number(data.tagId);
+      } catch (error) {
+        throw new AppError('Error creating contact list');
+      }
+    }
+
+    if (data.tagId && typeof data.contactListId === 'number') {
+      const tagId = data.tagId;
+      const campanhaNome = data.name;
+
+      try {
+        const contactListId = await createContactListFromTagAndContactList(tagId, data.contactListId, companyId, campanhaNome);
+
+        data.contactListId = contactListId;
+        data.tagId = Number(data.tagId);
+      } catch (error) {
+        throw new AppError('Error creating contact list');
+      }
+    }
   }
 
   await record.update(data);

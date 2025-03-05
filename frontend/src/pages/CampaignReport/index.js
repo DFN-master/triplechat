@@ -15,14 +15,13 @@ import CardCounter from "../../components/Dashboard/CardCounter";
 import GroupIcon from "@material-ui/icons/Group";
 import ScheduleIcon from "@material-ui/icons/Schedule";
 import EventAvailableIcon from "@material-ui/icons/EventAvailable";
-import DoneIcon from "@material-ui/icons/Done";
-import DoneAllIcon from "@material-ui/icons/DoneAll";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import WhatsAppIcon from "@material-ui/icons/WhatsApp";
 import ListAltIcon from "@material-ui/icons/ListAlt";
 import { useDate } from "../../hooks/useDate";
 
 import { SocketContext } from "../../context/Socket/SocketContext";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -47,8 +46,6 @@ const CampaignReport = () => {
   const [campaign, setCampaign] = useState({});
   const [validContacts, setValidContacts] = useState(0);
   const [delivered, setDelivered] = useState(0);
-  const [confirmationRequested, setConfirmationRequested] = useState(0);
-  const [confirmed, setConfirmed] = useState(0);
   const [percent, setPercent] = useState(0);
   const [loading, setLoading] = useState(false);
   const mounted = useRef(true);
@@ -72,22 +69,15 @@ const CampaignReport = () => {
     if (mounted.current && has(campaign, "shipping")) {
       if (has(campaign, "contactList")) {
         const contactList = get(campaign, "contactList");
+        if (!contactList) return;
         const valids = contactList.contacts.filter((c) => c.isWhatsappValid);
         setValidContacts(valids.length);
       }
 
       if (has(campaign, "shipping")) {
         const contacts = get(campaign, "shipping");
+        if(!contacts) return;
         const delivered = contacts.filter((c) => !isNull(c.deliveredAt));
-        const confirmationRequested = contacts.filter(
-          (c) => !isNull(c.confirmationRequestedAt)
-        );
-        const confirmed = contacts.filter(
-          (c) => !isNull(c.deliveredAt) && !isNull(c.confirmationRequestedAt)
-        );
-        setDelivered(delivered.length);
-        setConfirmationRequested(confirmationRequested.length);
-        setConfirmed(confirmed.length);
         setDelivered(delivered.length);
       }
     }
@@ -130,15 +120,15 @@ const CampaignReport = () => {
   const formatStatus = (val) => {
     switch (val) {
       case "INATIVA":
-        return "Inativa";
+        return i18n.t("campaigns.status.inactive");
       case "PROGRAMADA":
-        return "Programada";
+        return i18n.t("campaigns.status.programmed");
       case "EM_ANDAMENTO":
-        return "Em Andamento";
+        return i18n.t("campaigns.status.inProgress");
       case "CANCELADA":
-        return "Cancelada";
+        return i18n.t("campaigns.status.canceled");
       case "FINALIZADA":
-        return "Finalizada";
+        return i18n.t("campaigns.status.finished");
       default:
         return val;
     }
@@ -149,13 +139,13 @@ const CampaignReport = () => {
       <MainHeader>
         <Grid style={{ width: "99.6%" }} container>
           <Grid xs={12} item>
-            <Title>Relatório da {campaign.name || "Campanha"}</Title>
+            <Title>{i18n.t("campaigns.report.title")} {campaign.name || i18n.t("campaigns.report.title2")}</Title>
           </Grid>
         </Grid>
       </MainHeader>
       <Paper className={classes.mainPaper} variant="outlined">
         <Typography variant="h6" component="h2">
-          Status: {formatStatus(campaign.status)} {delivered} de {validContacts}
+          Status: {formatStatus(campaign.status)} {delivered} {i18n.t("campaigns.report.of")} {validContacts}
         </Typography>
         <Grid spacing={2} container>
           <Grid xs={12} item>
@@ -168,35 +158,15 @@ const CampaignReport = () => {
           <Grid xs={12} md={4} item>
             <CardCounter
               icon={<GroupIcon fontSize="inherit" />}
-              title="Contatos Válidos"
+              title={i18n.t("campaigns.report.validContacts")}
               value={validContacts}
               loading={loading}
             />
           </Grid>
-          {campaign.confirmation && (
-            <>
-              <Grid xs={12} md={4} item>
-                <CardCounter
-                  icon={<DoneIcon fontSize="inherit" />}
-                  title="Confirmações Solicitadas"
-                  value={confirmationRequested}
-                  loading={loading}
-                />
-              </Grid>
-              <Grid xs={12} md={4} item>
-                <CardCounter
-                  icon={<DoneAllIcon fontSize="inherit" />}
-                  title="Confirmações"
-                  value={confirmed}
-                  loading={loading}
-                />
-              </Grid>
-            </>
-          )}
           <Grid xs={12} md={4} item>
             <CardCounter
               icon={<CheckCircleIcon fontSize="inherit" />}
-              title="Entregues"
+              title={i18n.t("campaigns.report.delivered")}
               value={delivered}
               loading={loading}
             />
@@ -205,7 +175,7 @@ const CampaignReport = () => {
             <Grid xs={12} md={4} item>
               <CardCounter
                 icon={<WhatsAppIcon fontSize="inherit" />}
-                title="Conexão"
+                title={i18n.t("campaigns.report.connection")}
                 value={campaign.whatsapp.name}
                 loading={loading}
               />
@@ -215,7 +185,7 @@ const CampaignReport = () => {
             <Grid xs={12} md={4} item>
               <CardCounter
                 icon={<ListAltIcon fontSize="inherit" />}
-                title="Lista de Contatos"
+                title={i18n.t("campaigns.report.contactList")}
                 value={campaign.contactList.name}
                 loading={loading}
               />
@@ -224,7 +194,7 @@ const CampaignReport = () => {
           <Grid xs={12} md={4} item>
             <CardCounter
               icon={<ScheduleIcon fontSize="inherit" />}
-              title="Agendamento"
+              title={i18n.t("campaigns.report.schedule")}
               value={datetimeToClient(campaign.scheduledAt)}
               loading={loading}
             />
@@ -232,7 +202,7 @@ const CampaignReport = () => {
           <Grid xs={12} md={4} item>
             <CardCounter
               icon={<EventAvailableIcon fontSize="inherit" />}
-              title="Conclusão"
+              title={i18n.t("campaigns.report.conclusion")}
               value={datetimeToClient(campaign.completedAt)}
               loading={loading}
             />

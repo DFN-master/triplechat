@@ -41,10 +41,10 @@ import BorderColorIcon from '@material-ui/icons/BorderColor';
 import ToDoList from "../pages/ToDoList/";
 import toastError from "../errors/toastError";
 import { makeStyles } from "@material-ui/core/styles";
-import { AllInclusive, AttachFile, BlurCircular, DeviceHubOutlined, Schedule } from '@material-ui/icons';
+import { AccountTree, AllInclusive, AttachFile, BlurCircular, Chat, DeviceHubOutlined, Schedule } from '@material-ui/icons';
 import usePlans from "../hooks/usePlans";
 import Typography from "@material-ui/core/Typography";
-import useVersion from "../hooks/useVersion";
+import { ShapeLine } from "@mui/icons-material";
 
 const useStyles = makeStyles((theme) => ({
   ListSubheader: {
@@ -154,19 +154,11 @@ const MainListItems = (props) => {
   const [chats, dispatch] = useReducer(reducer, []);
   const { getPlanCompany } = usePlans();
   
-  const [version, setVersion] = useState(false);
-  
-  
-  const { getVersion } = useVersion();
+  const [openFlowsSubmenu, setOpenFlowsSubmenu] = useState(false);
 
   const socketManager = useContext(SocketContext);
 
   useEffect(() => {
-    async function fetchVersion() {
-      const _version = await getVersion();
-      setVersion(_version.version);
-    }
-    fetchVersion();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
  
@@ -305,7 +297,7 @@ const MainListItems = (props) => {
 	{showKanban && (  
 	  <ListItemLink
         to="/kanban"
-        primary={i18n.t("Kanban")}
+        primary={`Kanban`}
         icon={<TableChartIcon />}
       />
 	  )}
@@ -319,7 +311,7 @@ const MainListItems = (props) => {
 	  
 	  <ListItemLink
         to="/todolist"
-        primary={i18n.t("Tarefas")}
+        primary={i18n.t("mainDrawer.listItems.tasks")}
         icon={<BorderColorIcon />}
       />
 
@@ -427,8 +419,55 @@ const MainListItems = (props) => {
                     </ListItem>
                   </List>
                 </Collapse>
+                {/* Flow builder */}
+                <ListItem
+                    button
+                    onClick={() => setOpenFlowsSubmenu((prev) => !prev)}
+                >
+                  <ListItemIcon>
+                    <AccountTree />
+                  </ListItemIcon>
+                  <ListItemText
+                      primary={i18n.t("mainDrawer.listItems.flows")}
+                  />
+                  {openCampaignSubmenu ? (
+                      <ExpandLessIcon />
+                  ) : (
+                      <ExpandMoreIcon />
+                  )}
+                </ListItem>
+
+                <Collapse
+                    style={{ paddingLeft: 15 }}
+                    in={openFlowsSubmenu}
+                    timeout="auto"
+                    unmountOnExit
+                >
+                  <List component="div" disablePadding>
+                    <ListItem
+                        onClick={() => history.push("/phrase-lists")}
+                        button
+                    >
+                      <ListItemIcon>
+                        <EventAvailableIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Campanha" />
+                    </ListItem>
+
+                    <ListItem
+                        onClick={() => history.push("/flowbuilders")}
+                        button
+                    >
+                      <ListItemIcon>
+                        <ShapeLine />
+                      </ListItemIcon>
+                      <ListItemText primary="Conversa" />
+                    </ListItem>
+                  </List>
+                </Collapse>
               </>
             )}
+
             {user.super && (
               <ListItemLink
                 to="/announcements"
@@ -506,8 +545,7 @@ const MainListItems = (props) => {
               </Hidden> 
               */}
               <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
-                {`6.0.0`}
-
+                8.0.1
               </Typography>
             </React.Fragment>
             }

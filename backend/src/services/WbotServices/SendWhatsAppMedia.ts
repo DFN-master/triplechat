@@ -7,7 +7,7 @@ import ffmpegPath from "@ffmpeg-installer/ffmpeg";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
-import mime from "mime-types";
+import { lookup } from "mime-types";
 import formatBody from "../../helpers/Mustache";
 
 interface Request {
@@ -51,7 +51,7 @@ export const getMessageOptions = async (
   pathMedia: string,
   body?: string
 ): Promise<any> => {
-  const mimeType = mime.lookup(pathMedia);
+  const mimeType = lookup(pathMedia) || "";
   const typeMessage = mimeType.split("/")[0];
 
   try {
@@ -63,7 +63,7 @@ export const getMessageOptions = async (
     if (typeMessage === "video") {
       options = {
         video: fs.readFileSync(pathMedia),
-        caption: body ? body : '',
+        caption: body ? body : "",
         fileName: fileName
         // gifPlayback: true
       };
@@ -125,7 +125,7 @@ const SendWhatsAppMedia = async ({
     const pathMedia = media.path;
     const typeMessage = media.mimetype.split("/")[0];
     let options: AnyMessageContent;
-    const bodyMessage = formatBody(body, ticket.contact)
+    const bodyMessage = formatBody(body, ticket.contact);
 
     if (typeMessage === "video") {
       options = {
@@ -167,7 +167,7 @@ const SendWhatsAppMedia = async ({
     } else {
       options = {
         image: fs.readFileSync(pathMedia),
-        caption: bodyMessage,
+        caption: bodyMessage
       };
     }
 

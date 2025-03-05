@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { QueryClient, QueryClientProvider } from "react-query";
 
-import { ptBR } from "@material-ui/core/locale";
+import {enUS, ptBR, esES} from "@material-ui/core/locale";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useMediaQuery } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
@@ -86,12 +86,15 @@ const App = () => {
 
     useEffect(() => {
         const i18nlocale = localStorage.getItem("i18nextLng");
-        const browserLocale =
-            i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
+        const browserLocale = i18nlocale?.substring(0, 2) ?? 'pt';
 
-        if (browserLocale === "ptBR") {
+        if (browserLocale === "pt"){
             setLocale(ptBR);
-        }
+        }else if( browserLocale === "en" ) {
+            setLocale(enUS)
+        }else if( browserLocale === "es" )
+            setLocale(esES)
+
     }, []);
 
     useEffect(() => {

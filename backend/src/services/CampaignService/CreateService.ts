@@ -7,20 +7,15 @@ import Whatsapp from "../../models/Whatsapp";
 interface Data {
   name: string;
   status: string;
-  confirmation: boolean;
   scheduledAt: string;
   companyId: number;
   contactListId: number;
+  tagId: number | null;
   message1?: string;
   message2?: string;
   message3?: string;
   message4?: string;
   message5?: string;
-  confirmationMessage1?: string;
-  confirmationMessage2?: string;
-  confirmationMessage3?: string;
-  confirmationMessage4?: string;
-  confirmationMessage5?: string;
   fileListId: number;
 }
 
