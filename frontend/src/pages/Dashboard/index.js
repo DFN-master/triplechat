@@ -11,7 +11,8 @@ import TextField from "@material-ui/core/TextField";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import Typography from "@material-ui/core/Typography";
 
-import CallIcon from "@material-ui/icons/Call";
+// import CallIcon from "@material-ui/icons/Call";
+import ChatIcon from '@mui/icons-material/Chat';
 import GroupAddIcon from "@material-ui/icons/GroupAdd";
 import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
@@ -390,7 +391,7 @@ const Dashboard = () => {
                   </Grid>
                 </Grid>
                 <Grid item xs={2}>
-                  <CallIcon
+                  <ChatIcon
                     style={{
                       fontSize: 100,
                       color: "#FFFFFF",
