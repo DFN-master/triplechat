@@ -26,14 +26,31 @@ app.set("queues", {
 const bodyparser = require('body-parser');
 app.use(bodyParser.json({ limit: '10mb' }));
 
+// Prod mode
+
+// app.use(
+//   cors(
+//     {
+//       credentials: true,
+//       origin: process.env.FRONTEND_URL
+//     }
+//   )
+// );
+
+//Dev mode
 app.use(
-  cors(
-    {
-      credentials: true,
-      origin: process.env.FRONTEND_URL
+  cors({
+    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin || origin === process.env.FRONTEND_URL || origin.startsWith("http://localhost")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Não permitido pelo CORS"));
+      }
     }
-  )
+  })
 );
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
