@@ -455,6 +455,12 @@ const CustomInput = (props) => {
               multiline
               className={classes.messageInput}
               maxRows={5}
+              inputProps={{
+                ...params.inputProps, // Mantém os inputProps originais
+                spellCheck: true, // Ativa o corretor ortográfico
+                autoCorrect: "on", // Corrige automaticamente palavras erradas
+                autoCapitalize: "sentences", // Capitaliza frases automaticamente
+              }}
             />
           );
         }}
@@ -604,6 +610,11 @@ const MessageInputCustom = (props) => {
     setShowEmoji(false);
     setLoading(false);
     setReplyingMessage(null);
+    
+    // Força a atualização do campo de texto
+    if (inputRef.current) {
+      inputRef.current.value = ""; // Define o valor do campo de texto como vazio
+    }
   };
 
   const handleStartRecording = async () => {
