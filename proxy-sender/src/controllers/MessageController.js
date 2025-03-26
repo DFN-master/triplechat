@@ -8,6 +8,7 @@ const logger = require('../utils/logger');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const {DownloadPdf} = require('../services/PdfServices/DownloadPdf')
 
 const secret = '1234';
 
@@ -36,53 +37,17 @@ exports.SendMessage = async (req, res) => {
             body: mensagem
         };
 
-
-
         const extractPdfLink = (text) => {
             const regex = /(https?:\/\/[^\s]+)/g;
             const match = text.match(regex);
             return match ? match[0] : null;
         };
 
-        const getFileNameFromHeaders = (headers) => {
-            const contentDisposition = headers['content-disposition'];
-            if (contentDisposition) {
-                const match = contentDisposition.match(/filename="(.+?)"/);
-                if (match) return match[1];
-            }
-            return `arquivo_${Date.now()}.pdf`; // Nome genérico se não houver header
-        };
-
-
-        const downloadPdf = async (url) => {
-            try {
-                const response = await axios({
-                    url,
-                    method: 'GET',
-                    responseType: 'stream',
-                });
-
-                const fileName = getFileNameFromHeaders(response.headers);
-                const outputPath = path.join(__dirname, `../archives/${fileName}`);
-
-                const writer = fs.createWriteStream(outputPath);
-                response.data.pipe(writer);
-
-                return new Promise((resolve, reject) => {
-                    writer.on('finish', () => {
-                        console.log('Download concluído:', outputPath);
-                        resolve();
-                    });
-                    writer.on('error', reject);
-                });
-            } catch (error) {
-                console.error('Erro ao baixar o PDF:', error.message);
-            }
-        };
-
         const pdfUrl = extractPdfLink(mensagem);
+
         if (pdfUrl) {
-            downloadPdf(pdfUrl);
+            const pdfLocation = await DownloadPdf(pdfUrl);
+            console.log(pdfLocation);
         } else {
             console.log('Nenhum link de PDF encontrado.');
         }
