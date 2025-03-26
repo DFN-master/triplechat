@@ -1,6 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
+const logger = require('../../utils/logger');
 
 exports.SendPdfFile = async (url, filePath, token, number) => {
     try {
@@ -8,15 +9,14 @@ exports.SendPdfFile = async (url, filePath, token, number) => {
         formData.append('number', number);
         formData.append('medias', fs.createReadStream(filePath)); // Lendo o arquivo para envio
 
-        const response = await axios.post(url, formData, {
+        await axios.post(url, formData, {
             headers: {
                 ...formData.getHeaders(), // Inclui automaticamente Content-Type correto
                 Authorization: `Bearer ${token}`,
             },
         });
 
-        console.log('PDF enviado com sucesso:', response.data);
     } catch (error) {
-        console.error('Erro ao enviar mensagem:', error.response?.data || error.message);
+        logger.error('Erro ao enviar PDF', error.response?.data || error.message);
     }
 };

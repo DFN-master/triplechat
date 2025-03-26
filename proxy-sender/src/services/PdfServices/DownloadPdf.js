@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const FormData = require('form-data');
+const logger = require('../../utils/logger');
 
 exports.DownloadPdf = async (url) => {
     try {
@@ -28,13 +28,13 @@ exports.DownloadPdf = async (url) => {
 
         return new Promise((resolve, reject) => {
             writer.on('finish', () => {
+                logger.info(`PDF salvo em: ${outputPath}`)
                 resolve(outputPath); // Retorna corretamente o caminho do arquivo
             });
             writer.on('error', reject);
         });
 
     } catch (error) {
-        console.error("Erro ao baixar o PDF:", error.message);
-        throw error; // Lança o erro para ser tratado pelo chamador
+        logger.error("Erro ao baixar o PDF:", error.message);
     }
 };
