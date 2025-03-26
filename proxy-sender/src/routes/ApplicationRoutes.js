@@ -9,10 +9,9 @@ const router = express.Router();
 // const auth = require('../middlewares/auth');
 const MessageController = require('../controllers/MessageController');
 
-router.get('/status', (req, res)=>{
-    res.send("OK")
-})
-router.get('/teste', MessageController.SendMessage)
+
+router.get('/integracao/hubsoft', MessageController.SendMessage)
+
 // router.post('/newuser',  MessageController.NewUser);
 // router.post('/changeuserstatus',  MessageController.ChangeUser);
 
