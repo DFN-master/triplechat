@@ -10,11 +10,11 @@ const { SendPdfFile } = require('../services/PdfServices/SendPdfFIle')
 exports.SendMessage = async (req, res) => {
     try {
 
-        // const numero = req.query.numero
-        // const token = req.query.token
+        const numero = req.query.numero
+        const token = req.query.token
 
-        const numero = "5531994766933"
-        const token = "tokenFibraxxWpp001"
+        // const numero = "5531994766933"
+        // const token = "tokenFibraxxWpp001"
 
         const mensagem = req.query.mensagem
         const msgJson = JSON.parse(mensagem)
