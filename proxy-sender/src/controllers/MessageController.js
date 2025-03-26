@@ -8,7 +8,8 @@ const logger = require('../utils/logger');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const {DownloadPdf} = require('../services/PdfServices/DownloadPdf')
+const { DownloadPdf } = require('../services/PdfServices/DownloadPdf')
+const { SendPdfFile } = require('../services/PdfServices/SendPdfFIle')
 
 const secret = '1234';
 
@@ -21,9 +22,15 @@ exports.SendMessage = async (req, res) => {
 
 
         const mensagem = req.query.mensagem
+        const msgJson = JSON.parse(mensagem)
         const numero = "5531994766933"
         const token = "tokenFibraxxWpp001"
+        const pdfUrl = msgJson.urlpdf
 
+
+        const msgFormatadaSemPix = `*${msgJson.empresa} Informa:* \n\nOlá, ${msgJson.nomeCliente} 😊\n\nSua fatura no valor de R$${msgJson.valor} vence em ${msgJson.dataVencimento}. Para realizar o pagamento, utilize o código de barras abaixo:\n\n📌 Código de barras: \n\n${msgJson.linhaDigitalvel}\n\n📄 Você também pode acessar sua fatura em PDF aqui:\n🔗 ${msgJson.urlpdf}\n\n💬 Se precisar, estamos à disposição!`
+
+        const msgFormatadaComPix = `*${msgJson.empresa} Informa:* \n\nOlá, ${msgJson.nomeCliente} 😊\n\nSua fatura no valor de R$${msgJson.valor} vence em ${msgJson.dataVencimento}. Para realizar o pagamento, utilize o código de barras abaixo:\n\n📌 Código de barras: \n\n${msgJson.linhaDigitalvel}\n\n📄 Você também pode acessar sua fatura em PDF aqui:\n🔗 ${msgJson.urlpdf}\n\n💵 Pagamento via PIX: \nCopie e cole o código abaixo no seu app bancário: \n\n💬 Se precisar, estamos à disposição!`
 
 
         const url = "https://api.triplechat.tripleplay.network/api/messages/send"
@@ -32,29 +39,41 @@ exports.SendMessage = async (req, res) => {
             'Content-Type': 'application/json'
         }
 
-        const data = {
+
+        const dataPix = {
             number: numero,
-            body: mensagem
+            body: msgJson.chavepix
         };
 
-        const extractPdfLink = (text) => {
-            const regex = /(https?:\/\/[^\s]+)/g;
-            const match = text.match(regex);
-            return match ? match[0] : null;
-        };
 
-        const pdfUrl = extractPdfLink(mensagem);
 
-        if (pdfUrl) {
-            const pdfLocation = await DownloadPdf(pdfUrl);
-            console.log(pdfLocation);
+        if (msgJson.chavepix) {
+            const dataMsg = {
+                number: numero,
+                body: msgFormatadaComPix
+            };
+
+            await axios.post(url, dataMsg, { headers });
+            await axios.post(url, dataPix, { headers });
+            if (pdfUrl) {
+                const pdfLocation = await DownloadPdf(pdfUrl);
+                await SendPdfFile(url, pdfLocation, token, numero)
+            }
+
         } else {
-            console.log('Nenhum link de PDF encontrado.');
+            const dataMsg = {
+                number: numero,
+                body: msgFormatadaSemPix
+            };
+
+            await axios.post(url, dataMsg, { headers });
+
+            if (pdfUrl) {
+                const pdfLocation = await DownloadPdf(pdfUrl);
+                await SendPdfFile(url, pdfLocation, token, numero)
+            }
         }
 
-        const response = await axios.post(url, data, { headers });
-
-        console.log(response.data)
         return res
             .status(200)
             .send("Mensagem enviada com sucesso!");
