@@ -5,91 +5,99 @@
  */
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 const secret = '1234';
 
-exports.ChangeUser = async (req, res) => {
-  try {
-    await Usuarios.update(
-      {
-        name: req.body.name,
-        password: req.body.password,
-        email: req.body.email,
-        active: req.body.active,
-        permissions: req.body.permissions,
-      },
-      { where: { id: req.body.id } },
-    );
-    const users = await Usuarios.findAll();
-    return res
-      .status(201)
-      .json({ status: 'sucesso', message: 'Usuário alterado com sucesso!', dados: { users } });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(401)
-      .json({ status: 'erro', message: 'Não foi possivel alterar os dados do usuário' });
-  }
-};
+exports.SendMessage = async (req, res) => {
+    try {
 
-exports.NewUser = async (req, res) => {
-  try {
-    const EmailExiste = await Usuarios.findAll({
-      where: { email: req.body.email },
-    });
+        // const numero = req.query.numero 
+        // const numero = req.query.token
 
-    if (EmailExiste.length > 0) {
-      console.log(EmailExiste);
-      return res
-        .status(201)
-        .json({ status: 'erro', message: 'O Email informado já está cadastrado!', dados: {} });
+
+
+        const mensagem = req.query.mensagem
+        const numero = "5531994766933"
+        const token = "tokenFibraxxWpp001"
+
+
+
+        const url = "https://api.triplechat.tripleplay.network/api/messages/send"
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+
+        const data = {
+            number: numero,
+            body: mensagem
+        };
+
+
+
+        const extractPdfLink = (text) => {
+            const regex = /(https?:\/\/[^\s]+)/g;
+            const match = text.match(regex);
+            return match ? match[0] : null;
+        };
+
+        const getFileNameFromHeaders = (headers) => {
+            const contentDisposition = headers['content-disposition'];
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename="(.+?)"/);
+                if (match) return match[1];
+            }
+            return `arquivo_${Date.now()}.pdf`; // Nome genérico se não houver header
+        };
+
+
+        const downloadPdf = async (url) => {
+            try {
+                const response = await axios({
+                    url,
+                    method: 'GET',
+                    responseType: 'stream',
+                });
+
+                const fileName = getFileNameFromHeaders(response.headers);
+                const outputPath = path.join(__dirname, `../archives/${fileName}`);
+
+                const writer = fs.createWriteStream(outputPath);
+                response.data.pipe(writer);
+
+                return new Promise((resolve, reject) => {
+                    writer.on('finish', () => {
+                        console.log('Download concluído:', outputPath);
+                        resolve();
+                    });
+                    writer.on('error', reject);
+                });
+            } catch (error) {
+                console.error('Erro ao baixar o PDF:', error.message);
+            }
+        };
+
+        const pdfUrl = extractPdfLink(mensagem);
+        if (pdfUrl) {
+            downloadPdf(pdfUrl);
+        } else {
+            console.log('Nenhum link de PDF encontrado.');
+        }
+
+        const response = await axios.post(url, data, { headers });
+
+        console.log(response.data)
+        return res
+            .status(200)
+            .send("Mensagem enviada com sucesso!");
+    } catch (error) {
+        console.log(error);
+        return res
+            .status(501)
+            .send("Não foi possivel enviar a mensagem.");
     }
-    await Usuarios.create(req.body);
-    const users = await Usuarios.findAll();
-    return res
-      .status(201)
-      .json({ status: 'sucesso', message: 'Cadastro realizado com sucesso!', dados: { users } });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(401)
-      .json({ status: 'erro', message: 'Não foi possivel criar o usuário' });
-  }
 };
 
-exports.Login = async (req, res) => {
-  try {
-    // Busca os dados do usuário baseado no email
-    const dadosDoUsuario = await Usuarios.findAll({ where: { email: req.body.email } });
-    // IF caso a busca do usuário na encontre nada
-    if (dadosDoUsuario.length === 0) {
-      return res
-        .status(401)
-        .json({ status: 'erro', message: 'Não foi possivel realizar o login - Email inválido' });
-    // IF caso o usuário esteja inativo
-    } if (!dadosDoUsuario[0].dataValues.active) {
-      return res
-        .status(401)
-        .json({ status: 'erro', message: 'O usuário está inativo', dados: {} });
-    // IF Caso a senha está errada
-    } if (dadosDoUsuario[0].dataValues.password !== req.body.password) {
-      return res
-        .status(401)
-        .json({ status: 'erro', message: 'Senha inválida', dados: {} });
-    }
-    // Login OK!
-    const token = jwt.sign({ dadosDoUsuario }, secret, {
-      expiresIn: 28800, // expires in 8hours
-    });
-    return res
-      .status(201)
-      .json({ status: 'sucesso', message: 'Login realizado com sucesso', dados: { jwt: token, permissoes: dadosDoUsuario[0].dataValues.permissions } });
-  } catch (error) {
-    logger.error("Erro ao consultar banco de dados")
-    console.log(error);
-
-    return res
-      .status(401)
-      .json({ status: 'erro', message: 'Não foi possivel realizar o login' });
-  }
-};

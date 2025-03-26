@@ -12,8 +12,9 @@ const MessageController = require('../controllers/MessageController');
 router.get('/status', (req, res)=>{
     res.send("OK")
 })
-router.post('/newuser',  MessageController.NewUser);
-router.post('/changeuserstatus',  MessageController.ChangeUser);
+router.get('/teste', MessageController.SendMessage)
+// router.post('/newuser',  MessageController.NewUser);
+// router.post('/changeuserstatus',  MessageController.ChangeUser);
 
 // Rotas de gestão do equipamento
 // router.post('/newdevice', auth, DeviceApplicationController.NewDevice);
