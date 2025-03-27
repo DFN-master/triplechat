@@ -36,7 +36,8 @@ exports.SendMessage = async (req, res) => {
 
         const dataPix = {
             number: numero,
-            body: msgJson.chavepix
+            body: msgJson.chavepix,
+            closeTicket: true
         };
 
 
@@ -44,7 +45,8 @@ exports.SendMessage = async (req, res) => {
         if (msgJson.chavepix) {
             const dataMsg = {
                 number: numero,
-                body: msgFormatadaComPix
+                body: msgFormatadaComPix,
+                closeTicket: true
             };
 
             await axios.post(url, dataMsg, { headers });
@@ -61,7 +63,8 @@ exports.SendMessage = async (req, res) => {
         } else {
             const dataMsg = {
                 number: numero,
-                body: msgFormatadaSemPix
+                body: msgFormatadaSemPix,
+                closeTicket: true
             };
 
             await axios.post(url, dataMsg, { headers });
