@@ -77,6 +77,30 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 			toastError(err);
 		}
 	};
+	// Função para voltar o cliente para o menu inicial
+	const handleBackTicketToMenu = async (e, status, userId) => {
+		setLoading(true);
+		try {
+			await api.put(`/tickets/${ticket.id}`, {
+				// "status":"pending","queueId":null, "fromMe": false, "userId": null
+				status: status,
+				userId: null,
+				queueId: null,
+				fromMe: false
+			});
+
+			setLoading(false);
+			if (status === "open") {
+				setCurrentTicket({ ...ticket, code: "#open" });
+			} else {
+				setCurrentTicket({ id: null, code: null })
+				history.push("/tickets");
+			}
+		} catch (err) {
+			setLoading(false);
+			toastError(err);
+		}
+	};
 
 	return (
 		<div className={classes.actionButtons}>
@@ -92,9 +116,9 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 			)}
 			{ticket.status === "open" && (
 				<>
-				{/* Botão para voltar o cliente para o menu inicial */}
+					{/* Botão para voltar o cliente para o menu inicial */}
 					<Tooltip title="Voltar para o Menu">
-						<IconButton onClick={e => handleUpdateTicketStatus(e, "pending", null)}>
+						<IconButton onClick={e => handleBackTicketToMenu(e, "pending", null)}>
 							<SettingsBackupRestoreRoundedIcon />
 						</IconButton>
 					</Tooltip>
