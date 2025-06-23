@@ -14,6 +14,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import UndoRoundedIcon from '@material-ui/icons/UndoRounded';
+import SettingsBackupRestoreRoundedIcon from '@material-ui/icons/SettingsBackupRestoreRounded';
 import Tooltip from '@material-ui/core/Tooltip';
 import { green } from '@material-ui/core/colors';
 
@@ -41,7 +42,7 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 
 	const customTheme = createTheme({
 		palette: {
-		  	primary: green,
+			primary: green,
 		}
 	});
 
@@ -91,11 +92,19 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 			)}
 			{ticket.status === "open" && (
 				<>
+				{/* Botão para voltar o cliente para o menu inicial */}
+					<Tooltip title="Voltar para o Menu">
+						<IconButton onClick={e => handleUpdateTicketStatus(e, "pending", null)}>
+							<SettingsBackupRestoreRoundedIcon />
+						</IconButton>
+					</Tooltip>
+
 					<Tooltip title={i18n.t("messagesList.header.buttons.return")}>
 						<IconButton onClick={e => handleUpdateTicketStatus(e, "pending", null)}>
 							<UndoRoundedIcon />
 						</IconButton>
 					</Tooltip>
+
 					<ThemeProvider theme={customTheme}>
 						<Tooltip title={i18n.t("messagesList.header.buttons.resolve")}>
 							<IconButton onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)} color="primary">
