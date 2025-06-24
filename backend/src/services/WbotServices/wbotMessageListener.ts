@@ -1172,6 +1172,7 @@ const verifyQueue = async (
     }
   });
 
+  // Mensagem de Saudação ao entrar na Fila
   const botText = async () => {
     let options = "";
 
