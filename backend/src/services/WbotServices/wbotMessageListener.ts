@@ -1177,7 +1177,7 @@ const verifyQueue = async (
     let options = "";
 
     queues.forEach((queue, index) => {
-      options += `*[ ${index + 1} ]* - ${queue.name}\n`;
+      options += `*[ ${index + 1} ]* - ${queue.name.replace("[IA] ","").replace("[IA]","")}\n`; // Se o nome tive [IA] é substituido por nada.
     });
 
     const textMessage = {
