@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import api from '../src/services/api'
 
-import * as serviceWorkerRegistration from './pwa/serviceWorkerRegistration';
+// import * as serviceWorkerRegistration from './pwa/serviceWorkerRegistration';
 
 import App from "./App";
 
@@ -15,7 +15,14 @@ ReactDOM.render(
 );
 
 // Registra o service worker
-serviceWorkerRegistration.register();
+//serviceWorkerRegistration.register();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/custom-sw.js')
+      .then(reg => console.log('SW registrado', reg))
+      .catch(err => console.error('Erro ao registrar SW:', err));
+  });
+}
 
 
 // Notificação no PWA
