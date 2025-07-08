@@ -17,3 +17,10 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+self.addEventListener('push', function (event) {
+  const data = event.data.json();
+  self.registration.showNotification(data.title, {
+    body: data.body,
+    icon: '/icon/icon-128x128.png'
+  });
+});
