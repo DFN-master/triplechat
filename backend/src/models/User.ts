@@ -22,6 +22,7 @@ import UserQueue from "./UserQueue";
 import Company from "./Company";
 import QuickMessage from "./QuickMessage";
 import Whatsapp from "./Whatsapp";
+import UserPushSubscription from "./UserPushSubscription";
 
 @Table
 class User extends Model<User> {
@@ -35,7 +36,7 @@ class User extends Model<User> {
 
   @Column
   email: string;
-  
+
   @Column
   allTicket: string;
 
@@ -91,6 +92,9 @@ class User extends Model<User> {
 
   @BelongsTo(() => Whatsapp)
   whatsapp: Whatsapp;
+
+  @HasMany(() => UserPushSubscription)
+  pushSubscriptions: UserPushSubscription[];
 
   @BeforeUpdate
   @BeforeCreate

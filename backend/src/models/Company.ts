@@ -22,6 +22,7 @@ import TicketTraking from "./TicketTraking";
 import User from "./User";
 import UserRating from "./UserRating";
 import Whatsapp from "./Whatsapp";
+import UserPushSubscription from "./UserPushSubscription";
 
 @Table
 class Company extends Model<Company> {
@@ -131,6 +132,9 @@ class Company extends Model<Company> {
     hooks: true
   })
   ticketTrankins: TicketTraking[];
+
+  @HasMany(() => UserPushSubscription)
+  userPushSubscriptions: UserPushSubscription[];
 }
 
 export default Company;
