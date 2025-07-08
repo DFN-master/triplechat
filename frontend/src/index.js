@@ -53,15 +53,30 @@ function urlBase64ToUint8Array(base64String) {
 	return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
 }
 
+
+
+// Verificação de PWA + envio para Service Worker
+const checkPWAStatus = () => {
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'SET_DISPLAY_MODE',
+      isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+      url: window.location.href
+    });
+  }
+};
+
+// Executa quando o SW estiver pronto
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.ready.then(() => {
+    checkPWAStatus();
+  });
+}
+
+// Também executa quando o display mode muda
+window.matchMedia('(display-mode: standalone)').addListener(checkPWAStatus);
+
+
+
 // Chamar a função
 subscribeUserToPush();
-
-// ReactDOM.render(
-// 	<React.StrictMode>
-// 		<CssBaseline>
-// 			<App />
-// 		</CssBaseline>,
-//   </React.StrictMode>
-
-// 	document.getElementById("root")
-// );

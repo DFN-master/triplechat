@@ -87,8 +87,10 @@
 	],
 	"start_url": ".",
 	"display": "standalone",
+	"permissions": ["notifications"],
 	"background_color": "#01579B",
 	"theme_color": "#000000",
+	"gcm_sender_id": "103953800507",
 	"screenshots": [
 		{
 			"src": "/screenshots/desktop.png",
