@@ -17,21 +17,25 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
-self.addEventListener('push', function (event) {
-  console.log('[SW] push event received:', event);
-  console.log('[SW] event.data:', event.data?.text());
 
-  try {
-    const data = event.data?.json();
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/icons/icon-128x128.png'
-    });
-  } catch (e) {
-    console.error('[SW] erro ao interpretar payload:', e);
-    self.registration.showNotification("Notificação", {
-      body: event.data?.text(),
-      icon: '/icons/icon-128x128.png'
-    });
+self.addEventListener('push', function (event) {
+  console.log("[SW] push event received:", event);
+  if (event.data) {
+    console.log("[SW] event.data:", event.data.text());
+
+    const data = event.data.json();
+
+    const title = data.title || "Notificação";
+    const options = {
+      body: data.body || "",
+      icon: "/icons/icon-128x128.png", // ajuste se necessário
+      // badge: "/icons/badge-72x72.png"  // opcional
+    };
+
+    event.waitUntil(
+      self.registration.showNotification(title, options)
+    );
+  } else {
+    console.log("[SW] push sem dados");
   }
 });

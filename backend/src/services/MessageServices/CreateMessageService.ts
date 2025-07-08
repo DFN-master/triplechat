@@ -2,6 +2,7 @@ import { getIO } from "../../libs/socket";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
+import { sendPushNotification } from "../PushNotificationServices/SendPushNotificationService";
 
 export interface MessageData {
   id: string;
@@ -58,6 +59,7 @@ const CreateMessageService = async ({
     throw new Error("ERR_CREATING_MESSAGE");
   }
 
+  //io para notificar novas mensagens
   const io = getIO();
   io.to(message.ticketId.toString())
     .to(`company-${companyId}-${message.ticket.status}`)
@@ -70,6 +72,15 @@ const CreateMessageService = async ({
       ticket: message.ticket,
       contact: message.ticket.contact
     });
+
+  // Push notification
+  const userIdForPush = message.ticket.userId;
+  const companyIdForPush = message.ticket.companyId;
+  const payload = {
+    title: "Nova Mensagem",
+    body: "Chegou uma nova mensagem",
+  }
+  await sendPushNotification(userIdForPush, companyIdForPush, payload)
 
   return message;
 };
