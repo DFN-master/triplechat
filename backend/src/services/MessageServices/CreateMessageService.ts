@@ -1,3 +1,4 @@
+import { url } from "inspector";
 import { getIO } from "../../libs/socket";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
@@ -79,8 +80,14 @@ const CreateMessageService = async ({
   const payload = {
     title: "Nova Mensagem",
     body: "Chegou uma nova mensagem",
+    url: `/tickets/${message.ticket.uuid}`,
+    contact: message.ticket.contact.name,
+    lastMessage: message.body,
   }
-  await sendPushNotification(userIdForPush, companyIdForPush, payload)
+  if (!message.fromMe) { // Envia notificação push apenas se a mensagem não for do próprio usuário
+    await sendPushNotification(userIdForPush, companyIdForPush, payload)
+  }
+
 
   return message;
 };
