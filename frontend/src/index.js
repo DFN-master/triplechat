@@ -40,7 +40,7 @@ async function subscribeUserToPush() {
 
 	console.log("Subscription gerada:", subscription);
 
-	await api.post("/save-subscription", {
+	await api.post("/pushnotification/save-subscription", {
 		data: JSON.stringify(subscription)
 });
 }
