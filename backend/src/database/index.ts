@@ -36,6 +36,7 @@ import BaileysChats from "../models/BaileysChats";
 import Files from "../models/Files";
 import FilesOptions from "../models/FilesOptions";
 import Prompt from "../models/Prompt";
+import UserPushSubscription from "../models/UserPushSubscription";
 import QueueIntegrations from "../models/QueueIntegrations";
 import { FlowDefaultModel } from "../models/FlowDefault";
 import { FlowBuilderModel } from "../models/FlowBuilder";
@@ -93,6 +94,7 @@ const models = [
   FlowAudioModel,
   FlowCampaignModel,
   FlowImgModel,
+  UserPushSubscription,
 ];
 
 sequelize.addModels(models);
