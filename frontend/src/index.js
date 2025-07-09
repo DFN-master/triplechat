@@ -15,13 +15,13 @@ ReactDOM.render(
 );
 
 // Registra o service worker
-//serviceWorkerRegistration.register();
+const swVersion = 'v2.0.1'; // Versão do service worker, pode ser incrementada para forçar atualização
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/custom-sw.js')
-      .then(reg => console.log('SW registrado', reg))
-      .catch(err => console.error('Erro ao registrar SW:', err));
-  });
+	window.addEventListener('load', () => {
+		navigator.serviceWorker.register(`/custom-sw.js?v=${swVersion}`)
+			.then(reg => console.log('SW registrado', reg))
+			.catch(err => console.error('Erro ao registrar SW:', err));
+	});
 }
 
 
@@ -49,7 +49,7 @@ async function subscribeUserToPush() {
 
 	await api.post("/pushnotification/save-subscription", {
 		data: JSON.stringify(subscription)
-});
+	});
 }
 
 // Função auxiliar para converter a VAPID key
@@ -64,20 +64,20 @@ function urlBase64ToUint8Array(base64String) {
 
 // Verificação de PWA + envio para Service Worker
 const checkPWAStatus = () => {
-  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({
-      type: 'SET_DISPLAY_MODE',
-      isStandalone: window.matchMedia('(display-mode: standalone)').matches,
-      url: window.location.href
-    });
-  }
+	if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+		navigator.serviceWorker.controller.postMessage({
+			type: 'SET_DISPLAY_MODE',
+			isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+			url: window.location.href
+		});
+	}
 };
 
 // Executa quando o SW estiver pronto
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.ready.then(() => {
-    checkPWAStatus();
-  });
+	navigator.serviceWorker.ready.then(() => {
+		checkPWAStatus();
+	});
 }
 
 // Também executa quando o display mode muda

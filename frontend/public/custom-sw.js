@@ -1,12 +1,19 @@
-// src/serviceWorker.js
+// This is a custom service worker for the TripleChat PWA
 const CACHE_NAME = "triplechat-pwa";
 const urlsToCache = ["/", "/index.html"];
 
-self.addEventListener("install", (event) => {
+self.addEventListener('install', (event) => {
+  self.skipWaiting(); // força o novo SW a ser ativado imediatamente
+});
+
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
+    Promise.all([
+      self.clients.claim(), // toma o controle das abas
+      caches.keys().then(keys =>
+        Promise.all(keys.map(key => caches.delete(key))) // limpa caches antigos
+      )
+    ])
   );
 });
 
@@ -48,19 +55,22 @@ self.addEventListener('push', async function (event) {
       actions: [
         { action: 'open', title: 'Abrir' },
         { action: 'close', title: 'Fechar' }
-      ]
-    }).then(() => {
-      setTimeout(() => {
-        self.registration.getNotifications()
-          .then(notifications => {
-            notifications.forEach(notification => {
-              if (notification.title === payload.title) {
-                notification.close();
-              }
-            });
-          });
-      }, 7000);
+      ],
+      tag: payload.title, // Garante que notificações com o mesmo título sejam atualizadas
+      renotify: true,
     })
+    // .then(() => {
+    //   setTimeout(() => {
+    //     self.registration.getNotifications()
+    //       .then(notifications => {
+    //         notifications.forEach(notification => {
+    //           if (notification.title === payload.title) {
+    //             notification.close();
+    //           }
+    //         });
+    //       });
+    //   }, 7000);
+    // })
   );
 });
 
